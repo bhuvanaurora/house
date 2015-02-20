@@ -1,7 +1,11 @@
+var config = require('./config.prod.json');
+var s3_config = require('./s3_config.json');
+
 var path = require('path');
 var express = require('express');
 var bodyParser = require('body-parser');
 var logger = require('morgan');
+var gm = require('gm');                               // npm install gm
 
 var crypto = require('crypto');
 var bcrypt = require('bcryptjs');
@@ -12,15 +16,45 @@ var moment = require('moment');
 var async = require('async');
 var request = require('request');
 var xml2js = require('xml2js');
+var mime = require('mime');                          // sudo npm install mime
+var multipart = require('connect-multiparty');       // npm install connect-multiparty
 
 var agenda = require('agenda')({ db: { address: 'localhost:27017/test' } });
 var sugar = require('sugar');
 var nodemailer = require('nodemailer');
 var _ = require('lodash');
 
+var fs = require('fs');
+var AWS = require('aws-sdk');                        // npm install aws-sdk
+AWS.config = s3_config;
+var s3 = new AWS.S3();
+var buf = new Buffer('');
+
 var tokenSecret = 'your unique secret';
 
-var showSchema = new mongoose.Schema({
+
+// -------------------------------------- Schemas --------------------------------------- //
+
+var houseSchema = new mongoose.Schema({
+  _id: String,
+  address: String,
+  neighborhood: String,
+  neighPictures: [String],
+  city: String,
+  pictures: [String],
+  amenities: [String],
+  rating: Number,
+  reviews: [String],
+  status: String,
+  addedBy: [{
+      type: mongoose.Schema.Types.ObjectId, ref: 'User'
+  }],
+  owner: [{
+      type: mongoose.Schema.Types.ObjectId, ref: 'User'
+  }]
+});
+
+/*var showSchema = new mongoose.Schema({
   _id: Number,
   name: String,
   airsDayOfWeek: String,
@@ -43,7 +77,7 @@ var showSchema = new mongoose.Schema({
       firstAired: Date,
       overview: String
   }]
-});
+});*/
 
 var userSchema = new mongoose.Schema({
   name: { type: String, trim: true, required: true },
@@ -56,7 +90,9 @@ var userSchema = new mongoose.Schema({
   google: {
     id: String,
     email: String
-  }
+  },
+  reviews: [String],
+  rating: Number
 });
 
 userSchema.pre('save', function(next) {
@@ -80,7 +116,8 @@ userSchema.methods.comparePassword = function(candidatePassword, cb) {
 };
 
 var User = mongoose.model('User', userSchema);
-var Show = mongoose.model('Show', showSchema);
+//var Show = mongoose.model('Show', showSchema);
+var House = mongoose.model('House', houseSchema);
 
 mongoose.connect('localhost');
 
@@ -91,6 +128,13 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(multipart({
+  uploadDir: './tmp'
+}));
+
+
+// ----------------------------------- Authentication -------------------------------------- //
+
 
 function ensureAuthenticated(req, res, next) {
   if (req.headers.authorization) {
@@ -200,7 +244,11 @@ app.post('/auth/google', function(req, res, next) {
   });
 });
 
+
+// -------------------------------------------- APIs ----------------------------------------- //
+
 app.get('/api/users', function(req, res, next) {
+
   if (!req.query.email) {
     return res.send(400, { message: 'Email parameter is required.' });
   }
@@ -212,8 +260,76 @@ app.get('/api/users', function(req, res, next) {
 });
 
 
+app.get('/api/houses', function(req, res, next) {
+  var query = House.find();
 
-app.get('/api/shows', function(req, res, next) {
+  query.exec(function(err, houses) {
+    if (err) return next(err);
+    res.send(houses);
+  });
+});
+
+
+app.get('/api/houses/:id', function(req, res, next) {
+  House.findById(req.params.id, function(err, house) {
+    if (err) return next(err);
+    res.send(house);
+  })
+});
+
+
+app.post('/api/houses', ensureAuthenticated, function(req, res, next) {
+  console.log('house server');
+  var house = new House({
+    _id: req.body.id,
+    city: req.body.city,
+    neighborhood: req.body.neighborhood,
+    address: req.body.address,
+    amenities: req.body.amenities,
+    pictures: req.body.pictures
+  });
+
+  house.save(function(err) {
+    if (err) return next(err);
+    res.status(200).end();
+  });
+});
+
+
+app.post('/upload', ensureAuthenticated, function(req, res, next) {
+  
+  var filePath = path.join(__dirname, req.files.file.path);
+  
+  gm(filePath)
+      .resize(600, 400)
+      .stream(function(err, stdout, stderr) {
+        var buf = new Buffer('');
+        var imageName = Date.now() + req.files.file.name;
+        stdout.on('data', function(data) {
+          buf = Buffer.concat([buf, data]);
+        });
+        stdout.on('end', function(data) {
+          var data = {
+            Bucket: "house-image",
+            Key: imageName,
+            Body: buf,
+            ContentType: mime.lookup(req.files.file.name)
+          };
+          s3.putObject(data, function(err, res) {
+            if (err) throw(err);
+          });
+          res.status(200).json({
+            imageurl: imageName
+          });
+          console.log('Image uploaded');
+        });
+      });
+
+});
+
+
+
+/*app.get('/api/shows', function(req, res, next) {
   var query = Show.find();
   if (req.query.genre) {
     query.where({ genre: req.query.genre });
@@ -315,7 +431,7 @@ app.post('/api/shows', function (req, res, next) {
       res.send(200);
     });
   });
-});
+});*/
 
 app.post('/api/subscribe', ensureAuthenticated, function(req, res, next) {
   Show.findById(req.body.showId, function(err, show) {

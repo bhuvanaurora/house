@@ -6,8 +6,8 @@
             </li>
         </ul>
         <ul class="genres">
-            <li ng-repeat="genre in genres">
-                <span ng-click="filterByGenre(genre)">{{genre}}</span>
+            <li ng-repeat="location in locations">
+                <span ng-click="filterByLocation(location)">{{location}}</span>
             </li>
         </ul>
     </div>
@@ -23,14 +23,20 @@
         </div>
         <div class="panel-body">
             <div class="row show-list">
-                <div class="fade-repeat col-xs-4 col-md-3" ng-repeat="show in shows | filter:query | orderBy:'rating':true">
-                    <a href="/shows/{{show._id}}">
+                <div class="fade-repeat col-xs-4 col-md-3" ng-repeat="house in houses | filter:query | orderBy:'rating':true">
+                    <a href="/houses/{{house._id}}">
+                        <img class="img-rounded" ng-src="https://s3-ap-southeast-1.amazonaws.com/house-image/{{house.pictures[0]}}" width="100%"/>
+                    </a>
+                    <div class="text-center">
+                        <a href="/houses/{{house._id}}">{{house.address}}, <strong>{{house.neighborhood}}</strong></a>
+                    </div>
+                    <!--a href="/shows/{{show._id}}">
                         <img class="img-rounded" ng-src="{{show.poster}}" width="100%"/>
                     </a>
                     <div class="text-center">
                         <a href="/shows/{{show._id}}">{{show.name}}</a>
                         <p class="text-muted">Episodes: {{show.episodes.length}}</p>
-                    </div>
+                    </div-->
                 </div>
             </div>
         </div>

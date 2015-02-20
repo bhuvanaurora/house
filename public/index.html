@@ -3,9 +3,9 @@
 <head>
   <base href="/">
   <meta charset="utf-8">
-  <title>ShowTrackr</title>
-  <link href="favicon.png" rel="icon" type="image/png">
-  <link href='http://fonts.googleapis.com/css?family=Roboto|Montserrat:400,700|Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
+  <title>House</title>
+  <!--link href="favicon.png" rel="icon" type="image/png"-->
+  <link href='http://fonts.googleapis.com/css?family=Roboto:100,200,400|Open+Sans:400,300,700' rel='stylesheet' type='text/css'>
   <link href="//cdn.jsdelivr.net/ionicons/1.4.1/css/ionicons.min.css" rel="stylesheet">
   <link href="stylesheets/animate.css" rel="stylesheet">
   <link href="stylesheets/style.css" rel="stylesheet">
@@ -14,26 +14,30 @@
 <div ng-controller="NavbarCtrl" class="navbar navbar-default navbar-static-top" role="navigation" bs-navbar>
   <div class="navbar-header">
     <a class="navbar-brand" href="/">
-      <span>Show<strong>Trackr</strong></span>
+      <span>House</span>
     </a>
   </div>
   <ul class="nav navbar-nav">
-    <li data-match-route="/$"><a href="/">Home</a></li>
-    <li data-match-route="/add"><a href="/add">Add</a></li>
+    <li data-match-route="/$"><a href="/"><strong>Home</strong></a></li>
+    <li data-match-route="/addHouse"><a ng-if="currentUser" href="/addHouse">Add <strong>House</strong></a></li>
+    <li data-match-route="/addHouse"><a ng-if="!currentUser" href="/login">Add <strong>House</strong></a></li>
   </ul>
   <ul class="nav navbar-nav pull-right" ng-if="!currentUser">
     <li data-match-route="/login"><a href="/login">Login</a></li>
     <li data-match-route="/signup"><a href="/signup">Sign up</a></li>
   </ul>
   <ul class="nav navbar-nav pull-right" ng-if="currentUser">
-    <li class="navbar-text" ng-bind="currentUser.email"></li>
+    <li class="navbar-text" ng-bind="currentUser.name"></li>
     <li><a href="javascript:void(0)" ng-click="logout()">Logout</a></li>
   </ul>
 </div>
 
 <div ng-view class="{{pageClass}}"></div>
 
+<script src="bower_components/ng-file-upload/angular-file-upload-shim.min.js"></script>
 <script src="vendor/angular.js"></script>
+<script src="bower_components/ng-file-upload/angular-file-upload.min.js"></script>
+
 <script src="vendor/angular-strap.js"></script>
 <script src="vendor/angular-strap.tpl.js"></script>
 <script src="vendor/angular-messages.js"></script>
@@ -44,16 +48,21 @@
 
 <script src="app.js"></script>
 <script src="filters/fromNow.js"></script>
+
 <script src="directives/uniqueEmail.js"></script>
 <script src="directives/passwordStrength.js"></script>
+
 <script src="controllers/main.js"></script>
 <script src="controllers/detail.js"></script>
 <script src="controllers/add.js"></script>
 <script src="controllers/navbar.js"></script>
 <script src="controllers/login.js"></script>
 <script src="controllers/signup.js"></script>
+
 <script src="services/auth.js"></script>
 <script src="services/show.js"></script>
+<script src="services/user.js"></script>
+<script src="services/houses.js"></script>
 <script src="services/subscription.js"></script>
 
 <!--<script src="app.min.js"></script>-->

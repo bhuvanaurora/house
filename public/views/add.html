@@ -1,16 +1,72 @@
 <div class="container">
   <div class="panel panel-default">
-    <div class="panel-heading">Add TV Show</div>
+    <div class="panel-heading">Add house details</div>
     <div class="panel-body">
-      <form class="form" method="post" ng-submit="addShow()" name="addForm">
+
+      <div id="owner">
+        <span>Are you the owner of the house?<span>
+        <button class="btn btn-primary" ng-click="enableForm()">Yes</button>
+        <button class="btn btn-danger">No</button>
+      </div>
+
+
+      <form class="form" method="post" ng-submit="addHouse()" name="addForm" enctype="multipart/form-data">
+
         <div class="form-group" ng-class="{ 'has-error' : addForm.showName.$invalid && addForm.showName.$dirty }">
-          <label class="control-label">Name</label>
-          <input class="form-control" type="text" name="showName" ng-model="showName" placeholder="Enter TV show name" required autofocus>
-          <div class="help-block text-danger" ng-if="addForm.showName.$dirty" ng-messages="addForm.showName.$error">
-            <div ng-message="required">TV show name is required.</div>
-          </div>
+
+          <!-- City --><br />
+
+          <label class="control-label">City</label>
+          <select class="form-control" name="city" ng-model="city" disabled>
+            <option value="Bangalore">Bangalore</option>
+          </select>
+
+          <!-- Neighborhood --><br />
+
+          <label class="control-label">Area</label>
+          <input class="form-control" list="neighborhood" name="neighborhood" ng-model="neighborhood" placeholder="Neighborhood" required autofocus disabled>
+          <datalist id="neighborhood">
+            <option ng-repeat="location in locations" value="{{location}}">{{location}}</option>
+          </datalist>
+
+          <!-- Address --><br />
+
+          <label class="control-label">Address</label>
+          <input class="form-control" name="address" ng-model="address" placeholder="Address" required disabled>
+
+          <!-- Status --><br />
+
+          <label class="control-label">Status</label>
+          <select class="form-control" name="status" ng-model="status" disabled>
+            <option value="up_for_grabs">Up for grabs</option>
+            <option value="booked">Booked</option>
+          </select>
+
+          <!-- Amenities --><br />
+
+          <label class="control-label">Amenities</label>
+          <ul class="genres">
+            <li ng-repeat="amenity in amenities">
+              <span ng-click="addAmenity(amenity)">{{amenity}}</span>
+            </li>
+          </ul>
+          <label class="control-label" ng-if="selectedAmenities!=''">Available Amenities</label>
+          <ul class="genres">
+            <li ng-repeat="selectedAmenity in selectedAmenities">
+              <span ng-click="removeAmenity(selectedAmenity)">{{selectedAmenity}}</span>
+            </li>
+          </ul>
+
+          <!-- Pictures --><br />
+
+          <label class="control-label">House pictures</label>
+          <input class="form-control"
+                  type="file"
+                  ng-file-select="onFileSelect($files)" multiple disabled/>
+
         </div>
-        <button class="btn btn-primary" type="submit" ng-disabled="addForm.$invalid">Add</button>
+        <br />
+        <button class="btn btn-primary form-control" type="submit" disabled>Add</button>
       </form>
     </div>
   </div>
