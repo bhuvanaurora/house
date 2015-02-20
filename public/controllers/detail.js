@@ -1,10 +1,27 @@
 angular.module('MyApp')
-  .controller('DetailCtrl', ['$scope', '$rootScope', '$routeParams', 'House', 'Subscription',
-    function($scope, $rootScope, $routeParams, House, Subscription) {
+  .controller('DetailCtrl', ['$scope', '$rootScope', '$routeParams', 'House', 'Subscription', 'Session', 'Auth',
+    function($scope, $rootScope, $routeParams, House, Subscription, Session, Auth) {
 
-      House.get({ _id: $routeParams.id }, function (house) {
-        $scope.house = house;
-      });
+    $scope.sessionCity = '';
+
+    $scope.session = Session;
+
+    $scope.session.success(function(data) {
+      $scope.sessionCity = data.city;
+      if (data.session == 'expired') {
+        Auth.logout();
+      }
+    });
+
+    House.get({ _id: $routeParams.id }, function (house) {
+      $scope.house = house;
+      console.log($scope.house);
+      $scope.selectedPicture = house.pictures[0];
+
+      $scope.changePicture = function (picture) {
+        $scope.selectedPicture = picture;
+      }
+    });
 
       /*Show.get({ _id: $routeParams.id }, function(show) {
         $scope.show = show;

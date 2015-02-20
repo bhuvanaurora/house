@@ -3,13 +3,13 @@ angular.module('MyApp', ['ngResource', 'ngMessages', 'ngRoute', 'ngAnimate', 'mg
     $locationProvider.html5Mode(true);
 
     $routeProvider
-      .when('/', {
+      /*.when('/', {
         templateUrl: 'views/home.html',
         controller: 'MainCtrl'
-      })
-      .when('/houses/:id', {
-        templateUrl: 'views/detail.html',
-        controller: 'DetailCtrl'
+      })*/
+      .when('/addHouse', {
+        templateUrl: 'views/add.html',
+        controller: 'AddCtrl'
       })
       .when('/login', {
         templateUrl: 'views/login.html',
@@ -19,9 +19,13 @@ angular.module('MyApp', ['ngResource', 'ngMessages', 'ngRoute', 'ngAnimate', 'mg
         templateUrl: 'views/signup.html',
         controller: 'SignupCtrl'
       })
-      .when('/addHouse', {
-        templateUrl: 'views/add.html',
-        controller: 'AddCtrl'
+      .when('/:city', {
+        templateUrl: 'views/home.html',
+        controller: 'MainCtrl'
+      })
+      .when('/:city/:neighborhood/:id', {
+        templateUrl: 'views/detail.html',
+        controller: 'DetailCtrl'
       })
       .otherwise({
         redirectTo: '/'

@@ -1,6 +1,17 @@
 angular.module('MyApp')
-  .controller('MainCtrl', ['$scope', 'House',
-    function($scope, House) {
+  .controller('MainCtrl', ['$scope', '$routeParams', 'House', 'Session', 'Auth',
+    function($scope, $routeParams, House, Session, Auth) {
+
+    $scope.sessionCity = '';
+
+    $scope.session = Session;
+
+    $scope.session.success(function(data) {
+      $scope.sessionCity = data.city;
+      if (data.session == 'expired') {
+        Auth.logout();
+      }
+    });
 
     $scope.alphabet = ['0-9', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J',
       'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
@@ -12,6 +23,10 @@ angular.module('MyApp')
 
     $scope.headingTitle = 'Top houses available';
     $scope.houses = House.query();
+
+    if ($routeParams.city) {
+      $scope.houses = House.query({ city: $routeParams.city });
+    }
 
     $scope.filterByLocation = function(location) {
       $scope.houses = House.query({ neighborhood: location });

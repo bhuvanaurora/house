@@ -1,3 +1,28 @@
+<!-- Navbar -->
+
+<div ng-controller="NavbarCtrl" class="navbar navbar-default navbar-static-top" role="navigation" bs-navbar>
+  <div class="navbar-header">
+    <a class="navbar-brand" href="/{{sessionCity}}">
+      <span>House</span>
+    </a>
+  </div>
+  <ul class="nav navbar-nav">
+    <li data-match-route="/{{sessionCity}}"><a href="/{{sessionCity}}"><strong>Home</strong></a></li>
+    <li data-match-route="/addHouse"><a ng-if="currentUser" href="/addHouse">Add <strong>House</strong></a></li>
+    <li data-match-route="/addHouse"><a ng-if="!currentUser" href="/login">Add <strong>House</strong></a></li>
+  </ul>
+  <ul class="nav navbar-nav pull-right" ng-if="!currentUser">
+    <li data-match-route="/login"><a href="/login">Login</a></li>
+    <li data-match-route="/signup"><a href="/signup">Sign up</a></li>
+  </ul>
+  <ul class="nav navbar-nav pull-right" ng-if="currentUser">
+    <li class="navbar-text" ng-bind="currentUser.name"></li>
+    <li><a href="javascript:void(0)" ng-click="logout()">Logout</a></li>
+  </ul>
+</div>
+
+<!-- Navbar ends -->
+
 <div class="jumbotron">
     <div class="container">
         <ul class="alphabet">
@@ -24,11 +49,11 @@
         <div class="panel-body">
             <div class="row show-list">
                 <div class="fade-repeat col-xs-4 col-md-3" ng-repeat="house in houses | filter:query | orderBy:'rating':true">
-                    <a href="/houses/{{house._id}}">
+                    <a href="/{{house.city}}/{{house.neighborhood}}/{{house._id}}">
                         <img class="img-rounded" ng-src="https://s3-ap-southeast-1.amazonaws.com/house-image/{{house.pictures[0]}}" width="100%"/>
                     </a>
                     <div class="text-center">
-                        <a href="/houses/{{house._id}}">{{house.address}}, <strong>{{house.neighborhood}}</strong></a>
+                        <a href="/{{house.city}}/{{house.neighborhood}}/{{house._id}}">{{house.address}}, <strong>{{house.neighborhood}}</strong></a>
                     </div>
                     <!--a href="/shows/{{show._id}}">
                         <img class="img-rounded" ng-src="{{show.poster}}" width="100%"/>

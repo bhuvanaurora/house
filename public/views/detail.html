@@ -1,10 +1,38 @@
+<!-- Navbar -->
+
+<div ng-controller="NavbarCtrl" class="navbar navbar-default navbar-static-top" role="navigation" bs-navbar>
+  <div class="navbar-header">
+    <a class="navbar-brand" href="/{{sessionCity}}">
+      <span>House</span>
+    </a>
+  </div>
+  <ul class="nav navbar-nav">
+    <li data-match-route="/$"><a href="/{{sessionCity}}"><strong>Home</strong></a></li>
+    <li data-match-route="/addHouse"><a ng-if="currentUser" href="/addHouse">Add <strong>House</strong></a></li>
+    <li data-match-route="/addHouse"><a ng-if="!currentUser" href="/login">Add <strong>House</strong></a></li>
+  </ul>
+  <ul class="nav navbar-nav pull-right" ng-if="!currentUser">
+    <li data-match-route="/login"><a href="/login">Login</a></li>
+    <li data-match-route="/signup"><a href="/signup">Sign up</a></li>
+  </ul>
+  <ul class="nav navbar-nav pull-right" ng-if="currentUser">
+    <li class="navbar-text" ng-bind="currentUser.name"></li>
+    <li><a href="javascript:void(0)" ng-click="logout()">Logout</a></li>
+  </ul>
+</div>
+
+<!-- Navbar ends -->
+
 <div class="container">
   <div class="panel panel-default">
     <div class="panel-body">
       <div class="media">
         <div class="pull-left">
-          <img class="media-object img-rounded" ng-src="https://s3-ap-southeast-1.amazonaws.com/house-image/{{house.pictures[0]}}">
-          <div class="text-center" ng-if="currentUser">
+          <img class="media-object img-rounded" ng-src="https://s3-ap-southeast-1.amazonaws.com/house-image/{{selectedPicture}}">
+          <span ng-repeat="picture in house.pictures" style="width:200px;">
+            <img class="img-rounded" ng-src="https://s3-ap-southeast-1.amazonaws.com/house-image/{{picture}}" ng-click="changePicture(picture)" style="width:200px;height:150px;cursor:pointer;">
+          </span>
+          <!--div class="text-center" ng-if="currentUser">
             <div ng-show="!isSubscribed()">
               <button ng-click="subscribe()" class="btn btn-block btn-success">
                 <span class="ion-plus"></span> Subscribe
@@ -18,14 +46,19 @@
           </div>
           <div class="text-center" ng-show="!currentUser">
             <a class="btn btn-block btn-primary" href="#/login">Login to Subscribe</a>
-          </div>
+          </div-->
         </div>
         <div class="media-body">
-          <h2 class="media-heading">
-            {{house.address}}
-            <span class="pull-right text-danger"><span class="ion-heart"></span> {{house.rating}}</span>
-          </h2>
-          <h4>{{house.status}}</h4>
+          <h3 class="media-heading">
+            {{house.address}}, {{house.neighborhood}}
+          </h3>
+          <h4>This house is {{house.status}}</h4>
+          <div class="genres" ng-repeat="amenity in house.amenities" style="cursor:auto;">
+            {{amenity}}
+          </div>
+          <h3 class="text-danger">
+            <span class="ion-heart"></span> {{house.rating}}
+          </h3>
         </div>
       </div>
     </div>

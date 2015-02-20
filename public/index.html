@@ -11,26 +11,6 @@
   <link href="stylesheets/style.css" rel="stylesheet">
 </head>
 <body>
-<div ng-controller="NavbarCtrl" class="navbar navbar-default navbar-static-top" role="navigation" bs-navbar>
-  <div class="navbar-header">
-    <a class="navbar-brand" href="/">
-      <span>House</span>
-    </a>
-  </div>
-  <ul class="nav navbar-nav">
-    <li data-match-route="/$"><a href="/"><strong>Home</strong></a></li>
-    <li data-match-route="/addHouse"><a ng-if="currentUser" href="/addHouse">Add <strong>House</strong></a></li>
-    <li data-match-route="/addHouse"><a ng-if="!currentUser" href="/login">Add <strong>House</strong></a></li>
-  </ul>
-  <ul class="nav navbar-nav pull-right" ng-if="!currentUser">
-    <li data-match-route="/login"><a href="/login">Login</a></li>
-    <li data-match-route="/signup"><a href="/signup">Sign up</a></li>
-  </ul>
-  <ul class="nav navbar-nav pull-right" ng-if="currentUser">
-    <li class="navbar-text" ng-bind="currentUser.name"></li>
-    <li><a href="javascript:void(0)" ng-click="logout()">Logout</a></li>
-  </ul>
-</div>
 
 <div ng-view class="{{pageClass}}"></div>
 
@@ -63,6 +43,7 @@
 <script src="services/show.js"></script>
 <script src="services/user.js"></script>
 <script src="services/houses.js"></script>
+<script src="services/session.js"></script>
 <script src="services/subscription.js"></script>
 
 <!--<script src="app.min.js"></script>-->

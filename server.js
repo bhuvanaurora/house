@@ -1,5 +1,5 @@
-var config = require('./config.prod.json');
-var s3_config = require('./s3_config.json');
+var config = require('./config.prod.json');           // General config file
+var s3_config = require('./s3_config.json');          // AWS S3 config file
 
 var path = require('path');
 var express = require('express');
@@ -12,6 +12,8 @@ var bcrypt = require('bcryptjs');
 var mongoose = require('mongoose');
 var jwt = require('jwt-simple');
 var moment = require('moment');
+var session = require('cookie-session');              // npm install cookie-session
+var cookieParser = require('cookie-parser');          // npm install cookie-parser
 
 var async = require('async');
 var request = require('request');
@@ -43,7 +45,7 @@ var houseSchema = new mongoose.Schema({
   city: String,
   pictures: [String],
   amenities: [String],
-  rating: Number,
+  rating: { type: Number, default: 2.5 },
   reviews: [String],
   status: String,
   addedBy: [{
@@ -132,6 +134,9 @@ app.use(multipart({
   uploadDir: './tmp'
 }));
 
+app.use(cookieParser('!^&secretKey-for_house)(_'));
+app.use(session({secret:'&^*^asldh#$9234('}));
+
 
 // ----------------------------------- Authentication -------------------------------------- //
 
@@ -182,6 +187,8 @@ app.post('/auth/login', function(req, res, next) {
     user.comparePassword(req.body.password, function(err, isMatch) {
       if (!isMatch) return res.send(401, 'Invalid email and/or password');
       var token = createJwtToken(user);
+      req.session.loginTime = Date.now();
+      req.session.city = 'Bangalore';
       res.send({ token: token });
     });
   });
@@ -205,6 +212,8 @@ app.post('/auth/facebook', function(req, res, next) {
   User.findOne({ facebook: profile.id }, function(err, existingUser) {
     if (existingUser) {
       var token = createJwtToken(existingUser);
+      req.session.loginTime = Date.now();
+      req.session.city = 'Bangalore';
       return res.send(token);
     }
     var user = new User({
@@ -217,6 +226,8 @@ app.post('/auth/facebook', function(req, res, next) {
     user.save(function(err) {
       if (err) return next(err);
       var token = createJwtToken(user);
+      req.session.loginTime = Date.now();
+      req.session.city = 'Bangalore';
       res.send(token);
     });
   });
@@ -227,6 +238,8 @@ app.post('/auth/google', function(req, res, next) {
   User.findOne({ google: profile.id }, function(err, existingUser) {
     if (existingUser) {
       var token = createJwtToken(existingUser);
+      req.session.loginTime = Date.now();
+      req.session.city = 'Bangalore';
       return res.send(token);
     }
     var user = new User({
@@ -239,6 +252,8 @@ app.post('/auth/google', function(req, res, next) {
     user.save(function(err) {
       if (err) return next(err);
       var token = createJwtToken(user);
+      req.session.loginTime = Date.now();
+      req.session.city = 'Bangalore';
       res.send(token);
     });
   });
@@ -246,6 +261,26 @@ app.post('/auth/google', function(req, res, next) {
 
 
 // -------------------------------------------- APIs ----------------------------------------- //
+
+app.get('/api/session', function(req, res, next) {
+
+  if (req.session) {
+
+    if (Date.now() - req.session.loginTime > 72000000) {               // Session expires in 20 hours
+      return res.status(200).json({
+        'session': 'expired',
+        'city': req.session.city
+      });
+    } else {
+      return res.status(200).json({
+        'session': 'OK',
+        'city': req.session.city
+      });
+    }
+
+  }
+
+});
 
 app.get('/api/users', function(req, res, next) {
 
@@ -263,10 +298,34 @@ app.get('/api/users', function(req, res, next) {
 app.get('/api/houses', function(req, res, next) {
   var query = House.find();
 
+  function sort_by_neighborhood () {
+    query.where({ neighborhood: req.query.neighborhood });
+  }
+
+  function sort_by_alphabet () {
+    query.where({ neighborhood: new RegExp('^' + '[' + req.query.alphabet + ']', 'i') });
+  }
+
+  function sort_by_city () {
+    query.where({ city: req.query.city });
+  }
+
+  if (req.query.neighborhood) {
+    sort_by_neighborhood();
+  } else if (req.query.alphabet) {
+    sort_by_alphabet();
+  } else if (req.query.city && req.query.neighborhood) {
+    sort_by_city();
+    sort_by_neighborhood();
+  } else if (req.query.city) {
+    sort_by_city();
+  }
+
   query.exec(function(err, houses) {
     if (err) return next(err);
     res.send(houses);
   });
+
 });
 
 
@@ -279,14 +338,15 @@ app.get('/api/houses/:id', function(req, res, next) {
 
 
 app.post('/api/houses', ensureAuthenticated, function(req, res, next) {
-  console.log('house server');
   var house = new House({
     _id: req.body.id,
     city: req.body.city,
     neighborhood: req.body.neighborhood,
     address: req.body.address,
     amenities: req.body.amenities,
-    pictures: req.body.pictures
+    pictures: req.body.pictures,
+    status: req.body.status,
+    addedBy: req.body.addedBy
   });
 
   house.save(function(err) {

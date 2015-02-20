@@ -1,6 +1,17 @@
 angular.module('MyApp')
-  .controller('AddCtrl', ['$scope', '$alert', '$upload', '$routeParams', '$location', 'House', 'Profile',
-    function($scope, $alert, $upload, $routeParams, $location, House, Profile) {
+  .controller('AddCtrl', ['$scope', '$alert', '$upload', '$routeParams', '$location', 'House', 'Profile', 'Session', 'Auth',
+    function($scope, $alert, $upload, $routeParams, $location, House, Profile, Session, Auth) {
+
+    $scope.sessionCity = '';
+
+    $scope.session = Session;
+
+    $scope.session.success(function(data) {
+      $scope.sessionCity = data.city;
+      if (data.session == 'expired') {
+        Auth.logout();
+      }
+    });
 
     Profile.get({ _id: $routeParams.id }, function (profile) {
         $scope.profile = profile;
@@ -53,10 +64,11 @@ angular.module('MyApp')
             amenities: $scope.selectedAmenities,
             pictures: poster,
             address: $scope.address,
+            status: $scope.status,
             addedBy: profile 
           }, function () {
             console.log('House added');
-            $location.path('/');
+            $location.path('/{{$scope.sessionCity}}');
           }, function (response) {
               $alert({
                   content: response.data.message,
