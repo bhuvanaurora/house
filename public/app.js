@@ -11,6 +11,14 @@ angular.module('MyApp', ['ngResource', 'ngMessages', 'ngRoute', 'ngAnimate', 'mg
         templateUrl: 'views/add.html',
         controller: 'AddCtrl'
       })
+      .when('/addHouse/:id', {
+        templateUrl: 'views/add.html',
+        controller: 'AddCtrl'
+      })
+      .when('/addOwner', {
+        templateUrl: 'views/addOwner.html',
+        controller: 'AddOwnerCtrl'
+      })
       .when('/login', {
         templateUrl: 'views/login.html',
         controller: 'LoginCtrl'

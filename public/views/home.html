@@ -6,6 +6,7 @@
       <span>House</span>
     </a>
   </div>
+  <div id="fb-root"></div>
   <ul class="nav navbar-nav">
     <li data-match-route="/{{sessionCity}}"><a href="/{{sessionCity}}"><strong>Home</strong></a></li>
     <li data-match-route="/addHouse"><a ng-if="currentUser" href="/addHouse">Add <strong>House</strong></a></li>
@@ -50,7 +51,7 @@
             <div class="row show-list">
                 <div class="fade-repeat col-xs-4 col-md-3" ng-repeat="house in houses | filter:query | orderBy:'rating':true">
                     <a href="/{{house.city}}/{{house.neighborhood}}/{{house._id}}">
-                        <img class="img-rounded" ng-src="https://s3-ap-southeast-1.amazonaws.com/house-image/{{house.pictures[0]}}" width="100%"/>
+                        <img class="img-rounded" ng-src="https://s3-ap-southeast-1.amazonaws.com/house-image/{{house.pictures[0]}}" width="240px" height="180px"/>
                     </a>
                     <div class="text-center">
                         <a href="/{{house.city}}/{{house.neighborhood}}/{{house._id}}">{{house.address}}, <strong>{{house.neighborhood}}</strong></a>

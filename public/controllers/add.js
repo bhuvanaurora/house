@@ -1,10 +1,21 @@
 angular.module('MyApp')
-  .controller('AddCtrl', ['$scope', '$alert', '$upload', '$routeParams', '$location', 'House', 'Profile', 'Session', 'Auth',
-    function($scope, $alert, $upload, $routeParams, $location, House, Profile, Session, Auth) {
+  .controller('AddCtrl', ['$scope', '$alert', '$window', '$upload', '$routeParams', '$rootScope', '$location', 'House', 'editProfile', 'Session', 'Auth', 'Owner', 'Profile',
+    function($scope, $alert, $window, $upload, $routeParams, $rootScope, $location, House, editProfile, Session, Auth, Owner, Profile) {
 
     $scope.sessionCity = '';
 
     $scope.session = Session;
+
+    if ($routeParams.id) {
+      formElements = document.getElementsByClassName('form-control');
+        if (document.getElementById('owner')) {
+          ownerEle = document.getElementById('owner');
+          ownerEle.hidden = true;
+        }
+        for (var i=0; i<formElements.length; i++) {
+          formElements[i].disabled = false;
+        }
+    }
 
     $scope.session.success(function(data) {
       $scope.sessionCity = data.city;
@@ -13,13 +24,13 @@ angular.module('MyApp')
       }
     });
 
-    Profile.get({ _id: $routeParams.id }, function (profile) {
+    Profile.get({ id: $rootScope.currentUser._id }, function (profile) {
         $scope.profile = profile;
     
         // -------------- Default values --------------- //
 
         $scope.city = 'Bangalore';
-        $scope.status = 'up_for_grabs';
+        $scope.status = 'up for grabs';
         $scope.amenities = ['Pool', 'Gym', 'Elevator', 'Parking', 'Power Backup', 'Club'];
         $scope.selectedAmenities = [];
         $scope.locations = ['Koramangala', 'Indiranagar', 'MG Road', 'Whitefield',
@@ -56,7 +67,6 @@ angular.module('MyApp')
           var id;
           var add = $scope.address.split(" ");
           id = add.join("-");
-          console.log(id);
           House.save({ 
             id: id,
             city: $scope.city,
@@ -65,10 +75,26 @@ angular.module('MyApp')
             pictures: poster,
             address: $scope.address,
             status: $scope.status,
-            addedBy: profile 
-          }, function () {
+            addedBy: $scope.profile._id,
+            owner: $routeParams.id
+          }, function (house) {
             console.log('House added');
-            $location.path('/{{$scope.sessionCity}}');
+
+            if ($scope.profile._id == $routeParams.id){
+
+              // ----------- houseOwned not being updated in the users' profile ------------- //
+
+              editProfile.updateHouseOwned($scope.profile._id, house._id).success(function () {
+              });
+              $window.location = '/'+$scope.sessionCity;
+             
+            } else {
+
+              editProfile.updateHouseOwned($routeParams.id, house._id).success(function () {
+              });
+              $window.location = '/'+$scope.sessionCity;
+            }
+
           }, function (response) {
               $alert({
                   content: response.data.message,
@@ -80,16 +106,14 @@ angular.module('MyApp')
         };
 
     });
-
     
     $scope.enableForm = function () {
-      formElements = document.getElementsByClassName('form-control');
-      owner = document.getElementById('owner');
-      for (var i=0; i<formElements.length; i++) {
-        formElements[i].disabled = false;
-      }
-      owner.hidden = true;
+      $window.location = '/addHouse/'+$rootScope.currentUser._id;
     };
+
+    $scope.addOwner = function () {
+      $location.path('/addOwner');
+    }
 
 
   }]);

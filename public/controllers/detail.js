@@ -1,6 +1,6 @@
 angular.module('MyApp')
-  .controller('DetailCtrl', ['$scope', '$rootScope', '$routeParams', 'House', 'Subscription', 'Session', 'Auth',
-    function($scope, $rootScope, $routeParams, House, Subscription, Session, Auth) {
+  .controller('DetailCtrl', ['$scope', '$rootScope', '$routeParams', 'House', 'Subscription', 'Session', 'Auth', 'Profile',
+    function($scope, $rootScope, $routeParams, House, Subscription, Session, Auth, Profile) {
 
     $scope.sessionCity = '';
 
@@ -15,12 +15,34 @@ angular.module('MyApp')
 
     House.get({ _id: $routeParams.id }, function (house) {
       $scope.house = house;
-      console.log($scope.house);
-      $scope.selectedPicture = house.pictures[0];
+      //console.log($scope.house.owner[0]);
 
-      $scope.changePicture = function (picture) {
-        $scope.selectedPicture = picture;
+      if ($scope.house.owner == '' || $scope.house.owner == []) {
+
+        $scope.owner.name = "Unknown";
+        $scope.selectedPicture = house.pictures[0];
+
+          $scope.changePicture = function (picture) {
+            $scope.selectedPicture = picture;
+          }
+
+      } else {
+
+        Profile.get({ id: $scope.house.owner }, function(owner) {
+          $scope.owner = owner;
+
+          console.log($scope.owner);
+
+          $scope.selectedPicture = house.pictures[0];
+
+          $scope.changePicture = function (picture) {
+            $scope.selectedPicture = picture;
+          }
+
+        });
+
       }
+      
     });
 
       /*Show.get({ _id: $routeParams.id }, function(show) {

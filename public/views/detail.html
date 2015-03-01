@@ -6,6 +6,7 @@
       <span>House</span>
     </a>
   </div>
+  <div id="fb-root"></div>
   <ul class="nav navbar-nav">
     <li data-match-route="/$"><a href="/{{sessionCity}}"><strong>Home</strong></a></li>
     <li data-match-route="/addHouse"><a ng-if="currentUser" href="/addHouse">Add <strong>House</strong></a></li>
@@ -48,9 +49,9 @@
             <a class="btn btn-block btn-primary" href="#/login">Login to Subscribe</a>
           </div-->
         </div>
-        <div class="media-body">
+        <div class="media-body" style="padding:30px;">
           <h3 class="media-heading">
-            {{house.address}}, {{house.neighborhood}}
+            {{house.address}}<br />{{house.neighborhood}}
           </h3>
           <h4>This house is {{house.status}}</h4>
           <div class="genres" ng-repeat="amenity in house.amenities" style="cursor:auto;">
@@ -59,6 +60,25 @@
           <h3 class="text-danger">
             <span class="ion-heart"></span> {{house.rating}}
           </h3>
+          <h4>Owner</h4>
+          {{owner.name}}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div class="media">
+        <div class="pull-left">
+          <div class="panel-heading">
+            House reviews
+          </div>
+        </div>
+        <div class="pull-right">
+          <div class="panel-heading">
+            Owner reviews
+          </div>
         </div>
       </div>
     </div>

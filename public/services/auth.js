@@ -1,5 +1,14 @@
 angular.module('MyApp')
-  .factory('Auth', function($http, $location, $rootScope, $alert, $window) {
+  .factory('Auth', ['$http', '$location', '$rootScope', '$alert', '$window',
+    function($http, $location, $rootScope, $alert, $window) {
+
+    /*$scope.session = Session;
+
+    $scope.session.success(function(data) {
+      $scope.sessionCity = data.city;
+    })*/
+
+
     var token = $window.localStorage.token;
     if (token) {
       var payload = JSON.parse($window.atob(token.split('.')[1]));
@@ -49,7 +58,7 @@ angular.module('MyApp')
               var payload = JSON.parse($window.atob(token.split('.')[1]));
               $window.localStorage.token = token;
               $rootScope.currentUser = payload.user;
-              $location.path('/');
+              $location.path('/Bangalore');
               $alert({
                 title: 'Cheers!',
                 content: 'You have successfully signed-in with Facebook.',
@@ -76,7 +85,7 @@ angular.module('MyApp')
                 var payload = JSON.parse($window.atob(token.split('.')[1]));
                 $window.localStorage.token = token;
                 $rootScope.currentUser = payload.user;
-                $location.path('/');
+                $location.path('/Bangalore');
                 $alert({
                   title: 'Cheers!',
                   content: 'You have successfully signed-in with Google.',
@@ -95,7 +104,7 @@ angular.module('MyApp')
             $window.localStorage.token = data.token;
             var payload = JSON.parse($window.atob(data.token.split('.')[1]));
             $rootScope.currentUser = payload.user;
-            $location.path('/');
+            $location.path('/Bangalore');
             $alert({
               title: 'Cheers!',
               content: 'You have successfully logged in.',
@@ -140,6 +149,7 @@ angular.module('MyApp')
       logout: function() {
         delete $window.localStorage.token;
         $rootScope.currentUser = null;
+        $location.path('/Bangalore');
         $alert({
           content: 'You have been logged out.',
           animation: 'fadeZoomFadeDown',
@@ -148,4 +158,4 @@ angular.module('MyApp')
         });
       }
     };
-  });
+  }]);

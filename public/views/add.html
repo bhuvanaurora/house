@@ -1,3 +1,5 @@
+<div id="fb-root"></div>
+
 <!-- Navbar -->
 
 <div ng-controller="NavbarCtrl" class="navbar navbar-default navbar-static-top" role="navigation" bs-navbar>
@@ -31,7 +33,7 @@
       <div id="owner">
         <span>Are you the owner of the house?<span>
         <button class="btn btn-primary" ng-click="enableForm()">Yes</button>
-        <button class="btn btn-danger">No</button>
+        <button class="btn btn-danger" ng-click="addOwner()">No</button>
       </div>
 
 
@@ -63,8 +65,8 @@
 
           <label class="control-label">Status</label>
           <select class="form-control" name="status" ng-model="status" disabled>
-            <option value="up_for_grabs">Up for grabs</option>
-            <option value="booked">Booked</option>
+            <option value="up for grabs">Up for grabs</option>
+            <option value="Booked">Booked</option>
           </select>
 
           <!-- Amenities --><br />

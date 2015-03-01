@@ -94,7 +94,12 @@ var userSchema = new mongoose.Schema({
     email: String
   },
   reviews: [String],
-  rating: Number
+  rating: Number,
+  pic: String,
+  houseOwned: {
+      type: mongoose.Schema.Types.ObjectId, ref: 'House'
+  },
+  isActive: { type: Boolean, default: true }
 });
 
 userSchema.pre('save', function(next) {
@@ -164,7 +169,7 @@ function createJwtToken(user) {
   var payload = {
     user: user,
     iat: new Date().getTime(),
-    exp: moment().add('days', 7).valueOf()
+    exp: moment().add(7, 'days').valueOf()
   };
   return jwt.encode(payload, tokenSecret);
 }
@@ -262,27 +267,24 @@ app.post('/auth/google', function(req, res, next) {
 
 // -------------------------------------------- APIs ----------------------------------------- //
 
-app.get('/api/session', function(req, res, next) {
+app.post('/api/session', ensureAuthenticated, function(req, res, next) {
 
-  if (req.session) {
-
-    if (Date.now() - req.session.loginTime > 72000000) {               // Session expires in 20 hours
-      return res.status(200).json({
-        'session': 'expired',
-        'city': req.session.city
-      });
-    } else {
-      return res.status(200).json({
-        'session': 'OK',
-        'city': req.session.city
-      });
-    }
-
+  if (Date.now() - req.session.loginTime > 72000000) {               // Session expires in 20 hours
+    return res.status(200).json({
+      'session': 'expired',
+      'city': req.session.city,
+    });
+  } else {
+    return res.status(200).json({
+      'session': 'OK',
+      'city': req.session.city,
+    });
   }
 
 });
 
-app.get('/api/users', function(req, res, next) {
+
+app.get('/api/users', ensureAuthenticated, function(req, res, next) {
 
   if (!req.query.email) {
     return res.send(400, { message: 'Email parameter is required.' });
@@ -291,6 +293,43 @@ app.get('/api/users', function(req, res, next) {
   User.findOne({ email: req.query.email }, function(err, user) {
     if (err) return next(err);
     res.send({ available: !user });
+  });
+});
+
+
+app.get('/api/profile/:id', ensureAuthenticated, function(req, res, next) {
+  user_details = {};
+  User.findById(req.params.id, function(err, user) {
+    if (err) return next (err);
+    user_details._id = user._id;
+    user_details.email = user.email;
+    user_details.name = user.name;
+    user_details.houseOwned = user.houseOwned;
+    user_details.isActive = user.isActive;
+    user_details.pic = user.pic;
+    res.send(user_details);
+  })
+})
+
+
+app.get('/api/editprofile/:id', ensureAuthenticated, function(req, res, next) {
+  User.findById(req.params.id, function (err, user) {
+    if (err) return next(err);
+    res.send(user);
+  })
+});
+
+
+app.put('/api/editprofile', ensureAuthenticated, function(req, res, next) {
+  console.log
+  User.findById(req.body.id, function(err, user) {
+    if (err) return next (err);
+    user.houseOwned = req.body.houseOwned;
+
+    user.save(function(err) {
+      if (err) return next(err);
+      res.status(200).end();
+    });
   });
 });
 
@@ -329,7 +368,7 @@ app.get('/api/houses', function(req, res, next) {
 });
 
 
-app.get('/api/houses/:id', function(req, res, next) {
+app.get('/api/houses/:id', ensureAuthenticated, function(req, res, next) {
   House.findById(req.params.id, function(err, house) {
     if (err) return next(err);
     res.send(house);
@@ -346,12 +385,36 @@ app.post('/api/houses', ensureAuthenticated, function(req, res, next) {
     amenities: req.body.amenities,
     pictures: req.body.pictures,
     status: req.body.status,
-    addedBy: req.body.addedBy
+    addedBy: req.body.addedBy,
+    owner: req.body.owner
   });
 
   house.save(function(err) {
     if (err) return next(err);
-    res.status(200).end();
+    res.send(200).end();
+  });
+});
+
+
+app.get('/api/addOwner/:id', ensureAuthenticated, function(req, res, next) {
+  User.findById(req.params.id, function(err, user) {
+    if (err) return next(err);
+    console.log(user);
+    res.send(user);
+  })
+});
+
+
+app.post('/api/addOwner', ensureAuthenticated, function(req, res, next) {
+  var owner = new User({
+    name: req.body.name,
+    pic: req.body.pic,
+    isActive: req.body.isActive
+  });
+
+  owner.save(function(err) {
+    if (err) return next(err);
+    res.send(owner);
   });
 });
 
@@ -387,6 +450,37 @@ app.post('/upload', ensureAuthenticated, function(req, res, next) {
 
 });
 
+
+app.post('/uploadProfilePic', ensureAuthenticated, function(req, res, next) {
+  
+  var filePath = path.join(__dirname, req.files.file.path);
+  
+  gm(filePath)
+      .resize(400, 400)
+      .stream(function(err, stdout, stderr) {
+        var buf = new Buffer('');
+        var imageName = 'Profile' + Date.now() + req.files.file.name;
+        stdout.on('data', function(data) {
+          buf = Buffer.concat([buf, data]);
+        });
+        stdout.on('end', function(data) {
+          var data = {
+            Bucket: "house-image",
+            Key: imageName,
+            Body: buf,
+            ContentType: mime.lookup(req.files.file.name)
+          };
+          s3.putObject(data, function(err, res) {
+            if (err) throw(err);
+          });
+          res.status(200).json({
+            imageurl: imageName
+          });
+          console.log('Profile pic uploaded');
+        });
+      });
+
+});
 
 
 /*app.get('/api/shows', function(req, res, next) {
