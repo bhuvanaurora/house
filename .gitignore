@@ -28,3 +28,6 @@ node_modules
 
 # S3 config file
 s3_config.json
+
+#tmp folder
+/tmp
