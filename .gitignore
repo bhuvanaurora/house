@@ -25,3 +25,6 @@ build/Release
 node_modules
 
 .idea
+
+# S3 config file
+s3_config.json
