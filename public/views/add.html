@@ -28,7 +28,7 @@
 <div class="container">
   <div class="panel panel-default">
     <div class="panel-heading">Add house details</div>
-    <div class="panel-body">
+    <div class="panel-body" style="height:1200px;">
 
       <div id="owner">
         <span>Are you the owner of the house?<span>
@@ -41,39 +41,89 @@
 
         <div class="form-group" ng-class="{ 'has-error' : addForm.showName.$invalid && addForm.showName.$dirty }">
 
-          <!-- City --><br />
+          <!-- City -->
 
-          <label class="control-label">City</label>
-          <select class="form-control" name="city" ng-model="city" disabled>
+          <label class="control-label" style="margin-top:20px;">City</label>
+          <select class="form-control" name="city" ng-model="city">
             <option value="Bangalore">Bangalore</option>
           </select>
 
-          <!-- Neighborhood --><br />
+          <!-- Neighborhood -->
 
-          <label class="control-label">Area</label>
-          <input class="form-control" list="neighborhood" name="neighborhood" ng-model="neighborhood" placeholder="Neighborhood" required autofocus disabled>
+	 <!-------------- NEIGHBORHOOD PICTURES TO BE ADDED -------------->
+         
+	  <label class="control-label" style="margin-top:20px;" >Area</label>
+          <input class="form-control" list="neighborhood" name="neighborhood" ng-model="neighborhood" placeholder="Neighborhood" required autofocus>
+
           <datalist id="neighborhood">
             <option ng-repeat="location in locations" value="{{location}}">{{location}}</option>
           </datalist>
 
-          <!-- Address --><br />
+          <!-- Address -->
 
-          <label class="control-label">Address</label>
-          <input class="form-control" name="address" ng-model="address" placeholder="Address" required disabled>
+          <label class="control-label" style="margin-top:20px;">Address</label>
+          <input class="form-control" name="address" ng-model="address" placeholder="Address" required>
 
-          <!-- Status --><br />
+	  <!-- Size -->
 
-          <label class="control-label">Status</label>
-          <select class="form-control" name="status" ng-model="status" disabled>
-            <option value="up for grabs">Up for grabs</option>
-            <option value="Booked">Booked</option>
+	  <label class="control-label" style="margin-top:20px">Size (sq. ft.)</label>
+	  <input class="form-control" name="size" ng-model="size" placeholder="Size (sq. ft.)" required>
+
+	  <!-- Property Type -->
+
+	  <label class="control-label" style="margin-top:20px;">Property Type</label>
+	  <select class="form-control" name="propType" ng-model="propType">
+	  <option value="Apartment">Apartment</option>
+	  <option value="Independent house">Independent house</option>
+	  </select>
+
+	  <!-- Description -->
+
+	  <label class="control-label" style="margin-top:20px;">Description</label>
+	  <textarea class="form-control" name="description" ng-model="description" placeholder="Description"></textarea>
+
+	  <!-- BHK -->
+
+	  <label class="control-label" style="margin-top:20px;">BHK</label>
+	  <select class="form-control" name="BHK" ng-model="BHK" required>
+	  <option value="Serviced Apartment">Serviced Apartment</option>
+	  <option value="1 RK">1 RK</option>
+	  <option value="1 BHK">1 BHK</option>
+	  <option value="2 BHK">2 BHK</option>
+	  <option value="3 BHK">3 BHK</option>
+	  <option value="4 BHK">4 BHK</option>
+	  <option value="5 BHK">5 BHK</option>
+	  <option value="5+ BHK">5+ BHK</option>
+	  </select>
+
+	  <!-- Bathrooms -->
+
+	  <label class="control-label" style="margin-top:20px;">Number of bathrooms</label>
+	  <input class="form-control" type="number" name="bathrooms" ng-model="bathrooms" placeholder="Bathrooms">
+
+	  <!-- Rent -->
+
+	  <label class="control-label" style="margin-top:20px;">Rent (&#8377)</label>
+	  <input type="number" class="form-control" name="rent" ng-model="rent" placeholder="Rent" required>
+
+	  <!-- Security Deposit -->
+
+	  <label class="control-label" style="margin-top:20px;">Security Deposit (&#8377)</label>
+	  <input type="number" class="form-control" name="secDeposit" ng-model="secDeposit" placeholder="{{rent}} X 2">
+
+          <!-- Status -->
+
+          <label class="control-label" style="margin-top:20px;">Status</label>
+          <select class="form-control" name="availability" ng-model="availability">
+            <option value="Available">Available</option>
+            <option value="Unavailable">Unavailable</option>
           </select>
 
-          <!-- Amenities --><br />
+          <!-- Amenities -->
 
-          <label class="control-label">Amenities</label>
-          <ul class="genres">
-            <li ng-repeat="amenity in amenities">
+          <label class="control-label" style="margin-top:20px;">Amenities</label>
+          <ul class="genres"> 
+            <li ng-repeat="amenity in amenities"> 
               <span ng-click="addAmenity(amenity)">{{amenity}}</span>
             </li>
           </ul>
@@ -84,16 +134,50 @@
             </li>
           </ul>
 
-          <!-- Pictures --><br />
+	  <!-- Furnishing -->
 
-          <label class="control-label">House pictures</label>
+	  <label class="control-label" style="margin-top:20px;">Furnishing</label>
+	  <select class="form-control" name="furnishing" ng-model="furnishing">
+	  <option value="Unfurnished">Unfurnished</option>
+	  <option value="Semi-furnished">Semi-furnished</option>
+	  <option value="Fully furnished">Fully furnished</option>
+	  </select>
+
+	  <!-- Year of construction -->
+
+	  <label class="control-label" style="margin-top:20px;">Year of construction</label>
+	  <input type="number" class="form-control" name="contructionYear" ng-model="contructionYear" placeholder="Year of construction">
+	  
+	  <!-- Tenants -->
+
+	  <label class="control-label" style="margin-top:20px;">Tenants</label>
+	  <select class="form-control" name="tenantsType" ng-model="tenantsType">
+	  <option value="Any">Any</option>
+	  <option value="Bachelors (Male)">Bachelors (Male)</option>
+	  <option value="Bachelors (Female)">Bachelors (Female)</option>
+	  <option value="Flatmate (Male)">Flatmate (Male)</option>
+	  <option value="Flatmate (Female)">Flatmate (Female)</option>
+	  <option value="Family">Family</option>
+	  </select>
+	
+          <!-- Pictures -->
+
+	  <!------------------- VIDEO TO BE ADDED ---------------------->
+
+          <label class="control-label" style="margin-top:20px;">House pictures</label>
           <input class="form-control"
                   type="file"
-                  ng-file-select="onFileSelect($files)" multiple disabled/>
+                  ng-file-select="onFileSelect($files)" multiple/>
+
+	  <!-- Contact -->
+
+	  <label class="control-label" style="margin-top:20px;">Contact details</label>
+	  <input class="form-control" type="number" name="phone" ng-model="phone" required>
+	  <input class="form-control" type="email" name="email" ng-model="email">
 
         </div>
         <br />
-        <button class="btn btn-primary form-control" type="submit" disabled>Add</button>
+        <button class="btn btn-primary form-control" style="margin-top:20px;" type="submit">Add</button>
       </form>
     </div>
   </div>

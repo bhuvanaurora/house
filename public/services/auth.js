@@ -18,20 +18,19 @@ angular.module('MyApp')
     // Asynchronously initialize Facebook SDK
     $window.fbAsyncInit = function() {
       FB.init({
-        appId: '624059410963642',
+        appId: '809113722498335',
         responseType: 'token',
-        version: 'v2.0'
+        version: 'v2.3',
+	oauth: true,
+	xfbml: true
       });
     };
 
     // Asynchronously load Facebook SDK
     (function(d, s, id) {
       var js, fjs = d.getElementsByTagName(s)[0];
-      if (d.getElementById(id)) {
-        return;
-      }
-      js = d.createElement(s);
-      js.id = id;
+      if (d.getElementById(id)) { return; }
+      js = d.createElement(s); js.id = id;
       js.src = "//connect.facebook.net/en_US/sdk.js";
       fjs.parentNode.insertBefore(js, fjs);
     }(document, 'script', 'facebook-jssdk'));

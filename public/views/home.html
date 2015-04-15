@@ -50,11 +50,11 @@
         <div class="panel-body">
             <div class="row show-list">
                 <div class="fade-repeat col-xs-4 col-md-3" ng-repeat="house in houses | filter:query | orderBy:'rating':true">
-                    <a href="/{{house.city}}/{{house.neighborhood}}/{{house._id}}">
-                        <img class="img-rounded" ng-src="https://s3-ap-southeast-1.amazonaws.com/house-image/{{house.pictures[0]}}" width="240px" height="180px"/>
+                    <a href="/{{house.address.city}}/{{house.address.neighborhood}}/{{house._id}}">
+                        <img class="img-rounded" ng-src="https://s3-ap-southeast-1.amazonaws.com/house-image/{{house.pictures.link[0]}}" width="240px" height="180px"/>
                     </a>
                     <div class="text-center">
-                        <a href="/{{house.city}}/{{house.neighborhood}}/{{house._id}}">{{house.address}}, <strong>{{house.neighborhood}}</strong></a>
+                        <a href="/{{house.address.city}}/{{house.address.neighborhood}}/{{house._id}}">{{house.address.house}}, <strong>{{house.address.neighborhood}}</strong></a>
                     </div>
                     <!--a href="/shows/{{show._id}}">
                         <img class="img-rounded" ng-src="{{show.poster}}" width="100%"/>

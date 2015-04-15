@@ -33,7 +33,9 @@ angular.module('MyApp')
     }
 
     $scope.filterByLocation = function(location) {
+	console.log(location);
       $scope.houses = House.query({ neighborhood: location });
+	console.log($scope.houses);
       $scope.headingTitle = location;
     };
 

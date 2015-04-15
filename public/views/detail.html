@@ -28,11 +28,32 @@
   <div class="panel panel-default">
     <div class="panel-body">
       <div class="media">
-        <div class="pull-left">
+	
+	<div style="height:80px;margin-top:20px;">
+	  <div class="col-lg-5 col-md-5 col-sm-5 col-xs-10" style="float:left;">
+            <h3 class="media-heading">
+	      {{house.address.house}}, {{house.address.neighborhood}}
+	    </h3>
+          </div>
+	  <div class="col-lg-1 col-md-1 col-sm-1 col-xs-2">
+	  </div>
+	  <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6" style="font-size:16px;height:80px;float:left;">
+  	    Size: <b>{{house.details.size}} sq.ft.</b><br />
+	    Type: <b>{{house.details.BHK}}</b>
+	  </div>
+	  <div class="col-lg-3 col-md-3 col-sm-3 col-xs-6" style="font-size:16px;height:80px;float:left;">
+	    Rent: <b>&#8377 {{house.cost.rent}}</b><br />
+	    Deposit: <b>&#8377 {{house.cost.secDeposit}}</b>
+	  </div>
+	</div>
+	
+	<div class="pull-left">
           <img class="media-object img-rounded" ng-src="https://s3-ap-southeast-1.amazonaws.com/house-image/{{selectedPicture}}">
-          <span ng-repeat="picture in house.pictures" style="width:200px;">
-            <img class="img-rounded" ng-src="https://s3-ap-southeast-1.amazonaws.com/house-image/{{picture}}" ng-click="changePicture(picture)" style="width:200px;height:150px;cursor:pointer;">
-          </span>
+	  <div style="display:inline-block;white-space:nowrap;width:610px;height:170px;overflow-x:scroll;overflow-y:hidden">
+            <span ng-repeat="picture in house.pictures.link" style="width:200px;">
+              <img class="img-rounded" ng-src="https://s3-ap-southeast-1.amazonaws.com/house-image/{{picture}}" ng-click="changePicture(picture)" style="width:200px;height:150px;cursor:pointer;">
+            </span>
+	  </div>
           <!--div class="text-center" ng-if="currentUser">
             <div ng-show="!isSubscribed()">
               <button ng-click="subscribe()" class="btn btn-block btn-success">
@@ -49,25 +70,47 @@
             <a class="btn btn-block btn-primary" href="#/login">Login to Subscribe</a>
           </div-->
         </div>
-        <div class="media-body" style="padding:30px;">
-          <h3 class="media-heading">
-            {{house.address}}<br />{{house.neighborhood}}
-          </h3>
-          <h4>This house is {{house.status}}</h4>
-          <div class="genres" ng-repeat="amenity in house.amenities" style="cursor:auto;">
-            {{amenity}}
-          </div>
+
+        <div class="media-body" style="padding:30px;padding-top:10px;font-size:16px;">
+	  Furnishing: <b>{{house.extras.furnishing}}</b> 
           <h3 class="text-danger">
             <span class="ion-heart"></span> {{house.rating}}
           </h3>
-          <h4>Owner</h4>
-          {{owner.name}}
-        </div>
+	  <p>Tenants allowed: <b>{{house.tenantsType}}</b></p>
+          <p>This house is <b>{{house.availability}}</b></p>
+	  <p>Amenities: 
+	    <b>
+	      <span class="genres" ng-repeat="amenity in house.extras.amenities" style="cursor:auto;margin-right:10px;">
+            {{amenity}}
+              </span>
+	    </b>
+	  </p>
+	  <p ng-if="house.extras.description">Description: <b>{{house.extras.description}}</b></p>
+	  <p ng-if="house.details.bathrooms || house.details.constructionYear">
+	    <span ng-if="house.details.bathrooms">
+	      Bathrooms: 
+		<b style="margin-right:40px;">
+		  {{house.details.bathrooms}}
+		</b>
+	    </span>
+	    <span ng-if="house.details.constructionYear">
+	      Year of Construction: 
+		<b>{{house.details.constructionYear}}</b>
+	    </span>
+	  </p>
+	  <p ng-if="house.details.propType">Property Type: <b>{{house.details.propType}}</b></p>
+          <p>Listed: <b>{{house.timeAdded | date:'dd-MM-yyyy'}}</b></p>
+	  <h4 ng-if="house.contact.phone || house.contact.email">Contact details</h4>
+	  <p ng-if="house.contact.phone">Phone: <b>{{house.contact.phone}}</b></p>
+	  <p ng-if="house.contact.email">Email: <b><a ng-href="mailto:{{house.contact.email}}?subject:%20Interested%20in%20{{house.address.house}}">{{house.contact.email}}</a></b></p>
+          <p>Owner: <b>{{owner.name}}</b></p>
+	  <p><span style="cursor:pointer" ng-click="fb_share()">Share</span></p>
+	</div>
       </div>
     </div>
   </div>
 
-  <div class="panel panel-default">
+  <!--div class="panel panel-default">
     <div class="panel-body">
       <div class="media">
         <div class="pull-left">
@@ -80,6 +123,14 @@
             Owner reviews
           </div>
         </div>
+      </div>
+    </div>
+  </div-->
+
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <div class="map-block" style="height:400px;width:800px;margin-left:auto;margin-right:auto;">
+	<div id="google-maps-container" style="height:400px;width:800px;"></div>
       </div>
     </div>
   </div>

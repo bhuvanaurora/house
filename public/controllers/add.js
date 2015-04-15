@@ -30,13 +30,13 @@ angular.module('MyApp')
         // -------------- Default values --------------- //
 
         $scope.city = 'Bangalore';
-        $scope.status = 'up for grabs';
-        $scope.amenities = ['Pool', 'Gym', 'Elevator', 'Parking', 'Power Backup', 'Club'];
+        $scope.availability = 'Available';
+        $scope.amenities = ['Pool', 'Gym', 'Club', 'Elevator', 'Servant Room', 'Parking (2W)', 'Parking (4W)', 'Power Backup'];
         $scope.selectedAmenities = [];
-        $scope.locations = ['Koramangala', 'Indiranagar', 'MG Road', 'Whitefield',
-                        'Marathahalli', 'Electronic City', 
-                        'HSR Layout', 'Hebbal', 'Domlur', 'RT Nagar'];
-
+        $scope.locations = ['Koramangala', 'Indiranagar', 'MG Road', 'Whitefield', 'Marathahalli', 'Electronic City', 'HSR Layout', 'Hebbal', 'Domlur', 'RT Nagar'];
+	$scope.furnishing = "Unfurnished";
+	$scope.tenants = "Any";
+	
         $scope.addAmenity = function(amenity) {
           $scope.selectedAmenities.push(amenity);
           $scope.amenities.splice($scope.amenities.indexOf(amenity), 1);
@@ -66,7 +66,8 @@ angular.module('MyApp')
         $scope.addHouse = function () {
           var id;
           var add = $scope.address.split(" ");
-          id = add.join("-");
+          id = add.join("-") + "-" + $scope.neighborhood + "-"+ $scope.city;
+	  if (!$scope.secDeposit) { $scope.secDeposit = $scope.rent*2; }
           House.save({ 
             id: id,
             city: $scope.city,
@@ -74,7 +75,19 @@ angular.module('MyApp')
             amenities: $scope.selectedAmenities,
             pictures: poster,
             address: $scope.address,
-            status: $scope.status,
+            availability: $scope.availability,
+	    size: $scope.size,
+	    propType: $scope.propType,
+	    description: $scope.description,
+	    BHK: $scope.BHK,
+	    bathrooms: $scope.bathrooms,
+	    rent: $scope.rent,
+	    secDeposit: $scope.secDeposit,
+	    furnishing: $scope.furnishing,
+	    constructionYear: $scope.constructionYear,
+	    tenantsType: $scope.tenantsType,
+	    phone: $scope.phone,
+	    email: $scope.email,
             addedBy: $scope.profile._id,
             owner: $routeParams.id
           }, function (house) {

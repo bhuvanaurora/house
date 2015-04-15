@@ -39,66 +39,81 @@ var tokenSecret = 'your unique secret';
 
 var houseSchema = new mongoose.Schema({
   _id: String,
-  address: String,
-  neighborhood: String,
-  neighPictures: [String],
-  city: String,
-  pictures: [String],
-  amenities: [String],
+  address: {
+	house: String,
+  	neighborhood: String,
+  	city: String
+  },
+  pictures: {
+	link: [String],
+	time: Date
+  },
+  video: {
+	link: String,
+	time: Date
+  },
+  cost: {
+  	rent: Number,
+  	secDeposit: Number
+  },
+  extras: {
+	description: { type: String, default: '' },
+  	furnishing: { type: String, default: 'Unfurnished' },
+  	amenities: { type: [String], default: [] }
+  },
   rating: { type: Number, default: 2.5 },
-  reviews: [String],
-  status: String,
+  noOfRatings: { type: Number, default: 0 },
+  reviews: { type: [String], default: [] },
+  noOfReviews: { type: Number, default: 0 },
+  availability: { type: String, default: 'Available' },	// status changed to availability
+  details: {
+	size: Number,
+  	BHK: String,
+  	bathrooms: Number,
+  	propType: { type: String, default: 'Apartment' },
+  	constructionYear: Number
+  },
+  tenantsType: { type: String, default: 'Any' },
+  tenants: {
+	present: [{type: mongoose.Schema.Types.ObjectId, ref: 'User'}]
+  },
+  discussion: [{
+	text: String,
+	user: {type: mongoose.Schema.Types.ObjectId, ref: 'User'},
+	rating: Number
+  }],
   addedBy: [{
       type: mongoose.Schema.Types.ObjectId, ref: 'User'
   }],
+  contact: {
+	phone: String,
+	email: String
+  },
   owner: [{
       type: mongoose.Schema.Types.ObjectId, ref: 'User'
-  }]
+  }],
+  timeAdded: { type: Date, default: Date.now() }
 });
 
-/*var showSchema = new mongoose.Schema({
-  _id: Number,
-  name: String,
-  airsDayOfWeek: String,
-  airsTime: String,
-  firstAired: Date,
-  genre: [String],
-  network: String,
-  overview: String,
-  rating: Number,
-  ratingCount: Number,
-  status: String,
-  poster: String,
-  subscribers: [{
-    type: mongoose.Schema.Types.ObjectId, ref: 'User'
-  }],
-  episodes: [{
-      season: Number,
-      episodeNumber: Number,
-      episodeName: String,
-      firstAired: Date,
-      overview: String
-  }]
-});*/
 
 var userSchema = new mongoose.Schema({
   name: { type: String, trim: true, required: true },
+  gender: String,
+  age: String,
   email: { type: String, unique: true, lowercase: true, trim: true },
   password: String,
   facebook: {
-    id: String,
-    email: String
+    id: String
   },
   google: {
     id: String,
     email: String
   },
   reviews: [String],
-  rating: Number,
-  pic: String,
-  houseOwned: {
-      type: mongoose.Schema.Types.ObjectId, ref: 'House'
-  },
+  noOfReviews: Number,
+  rating: { type: Number, default: 2.5 },
+  picture: String,
+  phone: String,
   isActive: { type: Boolean, default: true }
 });
 
@@ -133,7 +148,7 @@ var app = express();
 app.set('port', process.env.PORT || 3000);
 app.use(logger('dev'));
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(multipart({
   uploadDir: './tmp'
@@ -178,7 +193,12 @@ app.post('/auth/signup', function(req, res, next) {
   var user = new User({
     name: req.body.name,
     email: req.body.email,
-    password: req.body.password
+    password: req.body.password,
+    reviews: [],
+    noOfreviews: 0,
+    rating: 2.5,
+    picture: '',
+    phone: ''
   });
   user.save(function(err) {
     if (err) return next(err);
@@ -205,7 +225,7 @@ app.post('/auth/facebook', function(req, res, next) {
   var encodedSignature = signedRequest.split('.')[0];
   var payload = signedRequest.split('.')[1];
 
-  var appSecret = '298fb6c080fda239b809ae418bf49700';
+  var appSecret = config.facebook.appSecret;
 
   var expectedSignature = crypto.createHmac('sha256', appSecret).update(payload).digest('base64');
   expectedSignature = expectedSignature.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
@@ -214,8 +234,17 @@ app.post('/auth/facebook', function(req, res, next) {
     return res.send(400, 'Invalid Request Signature');
   }
 
-  User.findOne({ facebook: profile.id }, function(err, existingUser) {
+  User.findOne({ email: profile.email }, function(err, existingUser) {
     if (existingUser) {
+      if (!existingUser.facebook.id) {
+	existingUser.facebook.id = profile.id;
+        existingUser.name = profile.name;
+	existingUser.gender = profile.gender;
+	existingUser.age = profile.age_range;
+	existingUser.save(function(err) {
+	  if (err) return next (err);
+	});
+      }
       var token = createJwtToken(existingUser);
       req.session.loginTime = Date.now();
       req.session.city = 'Bangalore';
@@ -223,10 +252,17 @@ app.post('/auth/facebook', function(req, res, next) {
     }
     var user = new User({
       name: profile.name,
+      gender: profile.gender,
+      age: profile.age_range,
+      email: profile.email,
       facebook: {
-        id: profile.id,
-        email: profile.email
-      }
+        id: profile.id
+      },
+      reviews: [],
+      noOfReviews: 0,
+      rating: 2.5,
+      picture: '',
+      phone: ''
     });
     user.save(function(err) {
       if (err) return next(err);
@@ -335,18 +371,19 @@ app.put('/api/editprofile', ensureAuthenticated, function(req, res, next) {
 
 
 app.get('/api/houses', function(req, res, next) {
+  
   var query = House.find();
 
   function sort_by_neighborhood () {
-    query.where({ neighborhood: req.query.neighborhood });
+    query.where({ 'address.neighborhood': req.query.neighborhood });
   }
 
   function sort_by_alphabet () {
-    query.where({ neighborhood: new RegExp('^' + '[' + req.query.alphabet + ']', 'i') });
+    query.where({ 'address.neighborhood': new RegExp('^' + '[' + req.query.alphabet + ']', 'i') });
   }
 
   function sort_by_city () {
-    query.where({ city: req.query.city });
+    query.where({ 'address.city': req.query.city });
   }
 
   if (req.query.neighborhood) {
@@ -379,13 +416,40 @@ app.get('/api/houses/:id', ensureAuthenticated, function(req, res, next) {
 app.post('/api/houses', ensureAuthenticated, function(req, res, next) {
   var house = new House({
     _id: req.body.id,
-    city: req.body.city,
-    neighborhood: req.body.neighborhood,
-    address: req.body.address,
-    amenities: req.body.amenities,
-    pictures: req.body.pictures,
-    status: req.body.status,
+    address: {
+	city: req.body.city,
+	neighborhood: req.body.neighborhood,
+	house: req.body.address
+    },
+    extras: {
+	description: req.body.description,
+	amenities: req.body.amenities,
+	furnishing: req.body.furnishing
+    },
+    pictures: {
+	link: req.body.pictures,
+	time: Date.now()
+    },
+    availability: req.body.availability,
+    size: req.body.size,
+    cost: {
+	rent: req.body.rent,
+    	secDeposit: req.body.secDeposit
+    },
+    constructionYear: req.body.constructionYear,
+    details: {
+	size: req.body.size,
+    	BHK: req.body.BHK,
+    	bathrooms: req.body.bathrooms,
+    	propType: req.body.propType,
+    	constructionYear: req.body.constructionYear
+    },
+    tenantsType: req.body.tenantsType,
     addedBy: req.body.addedBy,
+    contact: {
+	phone: req.body.phone,
+	email: req.body.email
+    },
     owner: req.body.owner
   });
 
@@ -422,7 +486,7 @@ app.post('/api/addOwner', ensureAuthenticated, function(req, res, next) {
 app.post('/upload', ensureAuthenticated, function(req, res, next) {
   
   var filePath = path.join(__dirname, req.files.file.path);
-  
+  console.log(filePath);
   gm(filePath)
       .resize(600, 400)
       .stream(function(err, stdout, stderr) {
@@ -616,7 +680,7 @@ app.get('*', function(req, res) {
 
 app.use(function(err, req, res, next) {
   console.error(err.stack);
-  res.send(500, { message: err.message });
+  res.status(500).send({ message: err.message });
 });
 
 app.listen(app.get('port'), function() {
